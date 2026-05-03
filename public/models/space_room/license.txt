@@ -1,0 +1,11 @@
+Model Information:
+* title:	Neoclassical Room of the 2001: A Space Odyssey
+* source:	https://sketchfab.com/3d-models/neoclassical-room-of-the-2001-a-space-odyssey-5560652bbf69423b8beb32ef91051cdc
+* author:	CG BANG! (https://sketchfab.com/CGbang)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Neoclassical Room of the 2001: A Space Odyssey" (https://sketchfab.com/3d-models/neoclassical-room-of-the-2001-a-space-odyssey-5560652bbf69423b8beb32ef91051cdc) by CG BANG! (https://sketchfab.com/CGbang) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
