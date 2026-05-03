@@ -1180,6 +1180,18 @@ body {
   animation: overlook-trike-bob 850ms ease-in-out infinite alternate;
 }
 
+.corridor-waveform-bar {
+  display: block;
+  width: 1px;
+  min-height: 4px;
+  border-radius: 9999px;
+  transform-origin: center;
+  transition:
+    height 110ms linear,
+    opacity 150ms ease-out,
+    box-shadow 220ms ease-out;
+}
+
 .overlook-ride-handlebar {
   position: absolute;
   bottom: 38%;

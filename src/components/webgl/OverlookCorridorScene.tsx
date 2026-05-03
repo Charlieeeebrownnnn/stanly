@@ -43,6 +43,15 @@ type DoorSide = "left" | "right";
 type StudyArtifactId = "axe" | "book" | "resume";
 type StudyArtifactProgress = Record<StudyArtifactId, { opened: boolean; isOpen: boolean }>;
 type StudySequencePhase = "idle" | "closingToVideo" | "video" | "closingToEnding" | "ending";
+type WaveformTheme = {
+  lineColor: string;
+  glowColor: string;
+  capsuleBorder: string;
+  capsuleBackground: string;
+  label: string;
+  baseline: number[];
+  gain: number;
+};
 const SIDE_ROOM_IDS: SideRoomId[] = ["room237", "spaceRoom", "orangeRoom", "artGallery"];
 const VISITABLE_ROOM_IDS: CorridorRoomId[] = [...SIDE_ROOM_IDS, "studyRoom"];
 const STUDY_ARTIFACT_IDS: StudyArtifactId[] = ["axe", "book", "resume"];
@@ -156,6 +165,127 @@ function getStudyRoomArtifactCopy(
   }
 
   return `${exploredCount} Of ${totalArtifactCount} Artifacts Explored`;
+}
+
+function getWaveformTheme(activeRoomId: CorridorRoomId | null): WaveformTheme {
+  if (activeRoomId === "room237") {
+    return {
+      lineColor: "rgba(180, 245, 218, 0.68)",
+      glowColor: "rgba(129, 236, 191, 0.16)",
+      capsuleBorder: "rgba(168, 236, 208, 0.12)",
+      capsuleBackground: "rgba(6, 16, 11, 0.22)",
+      label: "Room 237 Frequency",
+      baseline: [0.12, 0.16, 0.1, 0.22, 0.13, 0.18, 0.08, 0.16, 0.1, 0.18, 0.12, 0.14],
+      gain: 0.9,
+    };
+  }
+
+  if (activeRoomId === "spaceRoom") {
+    return {
+      lineColor: "rgba(255, 244, 214, 0.72)",
+      glowColor: "rgba(245, 231, 170, 0.14)",
+      capsuleBorder: "rgba(255, 240, 194, 0.12)",
+      capsuleBackground: "rgba(24, 22, 14, 0.16)",
+      label: "Monolith Transmission",
+      baseline: [0.08, 0.18, 0.07, 0.24, 0.06, 0.22, 0.08, 0.26, 0.07, 0.16, 0.08, 0.22],
+      gain: 1.05,
+    };
+  }
+
+  if (activeRoomId === "orangeRoom") {
+    return {
+      lineColor: "rgba(255, 211, 157, 0.7)",
+      glowColor: "rgba(255, 171, 98, 0.16)",
+      capsuleBorder: "rgba(255, 207, 164, 0.12)",
+      capsuleBackground: "rgba(24, 12, 7, 0.18)",
+      label: "Korova Hum",
+      baseline: [0.1, 0.14, 0.22, 0.12, 0.26, 0.1, 0.18, 0.14, 0.24, 0.11, 0.16, 0.09],
+      gain: 1,
+    };
+  }
+
+  if (activeRoomId === "artGallery") {
+    return {
+      lineColor: "rgba(255, 232, 206, 0.68)",
+      glowColor: "rgba(255, 207, 148, 0.14)",
+      capsuleBorder: "rgba(255, 226, 198, 0.11)",
+      capsuleBackground: "rgba(20, 18, 14, 0.16)",
+      label: "Memory Gallery Tone",
+      baseline: [0.06, 0.1, 0.15, 0.2, 0.14, 0.18, 0.1, 0.16, 0.22, 0.12, 0.18, 0.08],
+      gain: 0.75,
+    };
+  }
+
+  if (activeRoomId === "studyRoom") {
+    return {
+      lineColor: "rgba(192, 228, 218, 0.62)",
+      glowColor: "rgba(141, 200, 188, 0.12)",
+      capsuleBorder: "rgba(181, 224, 206, 0.1)",
+      capsuleBackground: "rgba(8, 11, 10, 0.22)",
+      label: "Study Signal",
+      baseline: [0.08, 0.12, 0.1, 0.18, 0.09, 0.16, 0.08, 0.2, 0.1, 0.14, 0.12, 0.16],
+      gain: 0.82,
+    };
+  }
+
+  return {
+    lineColor: "rgba(220, 244, 230, 0.62)",
+    glowColor: "rgba(138, 220, 185, 0.12)",
+    capsuleBorder: "rgba(208, 237, 222, 0.1)",
+    capsuleBackground: "rgba(6, 12, 10, 0.18)",
+    label: "Hallway Atmosphere",
+    baseline: [0.04, 0.08, 0.13, 0.09, 0.16, 0.08, 0.14, 0.07, 0.12, 0.08, 0.13, 0.06],
+    gain: 0.68,
+  };
+}
+
+function TopWaveformHud({
+  activeRoomId,
+  levels,
+  dimmed = false,
+}: {
+  activeRoomId: CorridorRoomId | null;
+  levels: number[];
+  dimmed?: boolean;
+}) {
+  const theme = useMemo(() => getWaveformTheme(activeRoomId), [activeRoomId]);
+  const bars = levels.length > 0 ? levels : theme.baseline;
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-4 z-[17] flex justify-center px-4">
+      <div
+        className="flex w-full max-w-[min(17rem,calc(100%-9.5rem))] items-center gap-3 rounded-full px-4 py-[0.45rem] backdrop-blur-md transition-opacity duration-500"
+        style={{
+          border: `1px solid ${theme.capsuleBorder}`,
+          background: `linear-gradient(180deg, ${theme.capsuleBackground}, rgba(0, 0, 0, 0.08))`,
+          boxShadow: `0 0 38px ${theme.glowColor}`,
+          opacity: dimmed ? 0.24 : 0.58,
+        }}
+      >
+        <div
+          className="hidden shrink-0 text-[0.47rem] uppercase tracking-[0.38em] sm:block"
+          style={{ color: theme.lineColor }}
+        >
+          {theme.label}
+        </div>
+
+        <div className="flex h-8 min-w-0 flex-1 items-center gap-[3px] overflow-hidden">
+          {bars.map((height, index) => (
+            <span
+              key={`${theme.label}-${index}`}
+              className="corridor-waveform-bar"
+              style={{
+                height: `${Math.round(5 + height * 28)}px`,
+                background: theme.lineColor,
+                boxShadow: `0 0 10px ${theme.glowColor}`,
+                opacity: Math.min(0.92, 0.34 + height * 0.96),
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function hasVisitedAllSideRooms(visitedRoomIds: CorridorRoomId[]) {
@@ -1354,6 +1484,9 @@ export default function OverlookCorridorScene({
   const [showStudyEndingActions, setShowStudyEndingActions] = useState(false);
   const [showStudyCopyToast, setShowStudyCopyToast] = useState(false);
   const [showQuickMenu, setShowQuickMenu] = useState(false);
+  const [waveformLevels, setWaveformLevels] = useState<number[]>(() =>
+    Array.from({ length: 20 }, (_, index) => (index % 5 === 0 ? 0.16 : 0.08)),
+  );
   const interactionPromptSourcesRef = useRef(new Map<CorridorRoomId, Set<string>>());
   const studyVideoRef = useRef<HTMLVideoElement | null>(null);
   const hallwayAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -1364,6 +1497,9 @@ export default function OverlookCorridorScene({
   const studyRoomAudioRef = useRef<HTMLAudioElement | null>(null);
   const studyEndingAudioRef = useRef<HTMLAudioElement | null>(null);
   const studyActionsAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserMapRef = useRef(new Map<HTMLMediaElement, AnalyserNode>());
+  const mediaSourceMapRef = useRef(new Map<HTMLMediaElement, MediaElementAudioSourceNode>());
 
   useEffect(() => {
     const createLoopAudio = (src: string, volume: number) => {
@@ -1395,6 +1531,19 @@ export default function OverlookCorridorScene({
     studyActionsAudioRef.current = studyActionsAudio;
 
     return () => {
+      analyserMapRef.current.forEach((analyser) => {
+        analyser.disconnect();
+      });
+      mediaSourceMapRef.current.forEach((source) => {
+        source.disconnect();
+      });
+      analyserMapRef.current.clear();
+      mediaSourceMapRef.current.clear();
+      if (audioContextRef.current) {
+        void audioContextRef.current.close().catch(() => undefined);
+        audioContextRef.current = null;
+      }
+
       [
         hallwayAudioRef.current,
         room237AudioRef.current,
@@ -1414,6 +1563,47 @@ export default function OverlookCorridorScene({
       });
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || previewMode) {
+      return;
+    }
+
+    const AudioContextCtor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+    if (!AudioContextCtor) {
+      return;
+    }
+
+    const context = audioContextRef.current ?? new AudioContextCtor();
+    audioContextRef.current = context;
+
+    const ensureAnalyser = (audio: HTMLAudioElement | null) => {
+      if (!audio || analyserMapRef.current.has(audio)) {
+        return;
+      }
+
+      const source = context.createMediaElementSource(audio);
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+      source.connect(analyser);
+      analyser.connect(context.destination);
+      mediaSourceMapRef.current.set(audio, source);
+      analyserMapRef.current.set(audio, analyser);
+    };
+
+    [
+      hallwayAudioRef.current,
+      room237AudioRef.current,
+      spaceRoomAudioRef.current,
+      orangeRoomAudioRef.current,
+      artGalleryAudioRef.current,
+      studyRoomAudioRef.current,
+      studyEndingAudioRef.current,
+      studyActionsAudioRef.current,
+    ].forEach(ensureAnalyser);
+  }, [previewMode]);
 
   useEffect(() => {
     const audioEntries = [
@@ -1523,6 +1713,80 @@ export default function OverlookCorridorScene({
     return () => {
       studyActionsAudio.pause();
       studyActionsAudio.currentTime = 0;
+    };
+  }, [activeRoomId, previewMode, showStudyEndingActions, soundEnabled, studySequencePhase]);
+
+  useEffect(() => {
+    if (previewMode || !soundEnabled) {
+      setWaveformLevels((current) => current.map((_, index) => (index % 5 === 0 ? 0.14 : 0.06)));
+      return;
+    }
+
+    const theme = getWaveformTheme(activeRoomId);
+    const activeAudio =
+      activeRoomId === null
+        ? hallwayAudioRef.current
+        : activeRoomId === "room237"
+          ? room237AudioRef.current
+          : activeRoomId === "spaceRoom"
+            ? spaceRoomAudioRef.current
+            : activeRoomId === "orangeRoom"
+              ? orangeRoomAudioRef.current
+              : activeRoomId === "artGallery"
+                ? artGalleryAudioRef.current
+                : activeRoomId === "studyRoom" && studySequencePhase === "idle"
+                  ? studyRoomAudioRef.current
+                  : activeRoomId === "studyRoom" && studySequencePhase === "video"
+                    ? studyEndingAudioRef.current
+                    : activeRoomId === "studyRoom" && studySequencePhase === "ending" && showStudyEndingActions
+                      ? studyActionsAudioRef.current
+                      : null;
+    const analyser = activeAudio ? analyserMapRef.current.get(activeAudio) ?? null : null;
+    const frequencyData = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
+    let frameId = 0;
+    let lastLevels = Array.from({ length: 20 }, (_, index) => theme.baseline[index % theme.baseline.length]);
+
+    const tick = () => {
+      if (audioContextRef.current?.state === "suspended" && activeAudio && !activeAudio.paused) {
+        void audioContextRef.current.resume().catch(() => undefined);
+      }
+
+      let nextLevels = lastLevels.map((_, index) => theme.baseline[index % theme.baseline.length]);
+
+      if (analyser && frequencyData) {
+        analyser.getByteFrequencyData(frequencyData);
+        const bucketSize = Math.max(1, Math.floor(frequencyData.length / nextLevels.length));
+        nextLevels = nextLevels.map((base, index) => {
+          const start = index * bucketSize;
+          const end = Math.min(frequencyData.length, start + bucketSize);
+          let total = 0;
+
+          for (let cursor = start; cursor < end; cursor += 1) {
+            total += frequencyData[cursor];
+          }
+
+          const average = end > start ? total / (end - start) : 0;
+          const normalized = (average / 255) * theme.gain;
+          const smoothed = THREE.MathUtils.lerp(lastLevels[index] ?? base, base + normalized * 1.28, 0.3);
+          return Math.max(0.04, Math.min(1, smoothed));
+        });
+      } else {
+        const now = performance.now() * 0.0014;
+        nextLevels = nextLevels.map((base, index) => {
+          const drift = (Math.sin(now + index * 0.34) + 1) * 0.028;
+          return Math.max(0.04, Math.min(0.36, base + drift));
+        });
+      }
+
+      lastLevels = nextLevels;
+      setWaveformLevels(nextLevels);
+      frameId = window.requestAnimationFrame(tick);
+    };
+
+    frameId = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
     };
   }, [activeRoomId, previewMode, showStudyEndingActions, soundEnabled, studySequencePhase]);
 
@@ -2042,6 +2306,14 @@ export default function OverlookCorridorScene({
             "radial-gradient(circle at center, rgba(0,0,0,0) 36%, rgba(0,0,0,0.2) 72%, rgba(0,0,0,0.64) 100%)",
         }}
       />
+
+      {!previewMode ? (
+        <TopWaveformHud
+          activeRoomId={activeRoomId}
+          levels={waveformLevels}
+          dimmed={showActiveRoomLoading || isStudySequenceOverlayVisible || showCorridorIntroCard}
+        />
+      ) : null}
 
       {!previewMode && !showActiveRoomLoading && !isStudySequenceOverlayVisible ? (
         <div className="absolute right-4 top-4 z-[19] flex max-w-[min(42rem,calc(100%-2rem))] justify-end">
