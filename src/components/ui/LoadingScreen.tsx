@@ -94,7 +94,22 @@ function formatProgress(value: number) {
   return `${Math.round(value)}`.padStart(2, "0");
 }
 
+function detectMobileExperience() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isMobileUserAgent =
+    /android|iphone|ipad|ipod|mobile|blackberry|iemobile|opera mini/.test(userAgent);
+  const hasCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  const hasNarrowViewport = window.matchMedia("(max-width: 1024px)").matches;
+
+  return isMobileUserAgent || (hasCoarsePointer && hasNarrowViewport);
+}
+
 export default function LoadingScreen() {
+  const [isMobileExperience, setIsMobileExperience] = useState(() => detectMobileExperience());
   const [displayedProgress, setDisplayedProgress] = useState(0);
   const [phase, setPhase] = useState<LoadingPhase>("loading");
   const [swallowPhase, setSwallowPhase] = useState<"idle" | "closing" | "opening">(
@@ -110,6 +125,19 @@ export default function LoadingScreen() {
   const op1AudioRef = useRef<HTMLAudioElement | null>(null);
   const op2AudioRef = useRef<HTMLAudioElement | null>(null);
 
+  useEffect(() => {
+    const updateMobileExperience = () => {
+      setIsMobileExperience(detectMobileExperience());
+    };
+
+    updateMobileExperience();
+    window.addEventListener("resize", updateMobileExperience);
+
+    return () => {
+      window.removeEventListener("resize", updateMobileExperience);
+    };
+  }, []);
+
   const beginGuideSelection = (confirmBlockMs = 0) => {
     setSelectionConfirmBlockedUntil(
       confirmBlockMs > 0 ? performance.now() + confirmBlockMs : 0,
@@ -118,18 +146,30 @@ export default function LoadingScreen() {
   };
 
   useEffect(() => {
+    if (isMobileExperience) {
+      return;
+    }
+
     const stored = window.localStorage.getItem(SOUND_STORAGE_KEY);
 
     if (stored === "false") {
       setSoundEnabled(false);
     }
-  }, []);
+  }, [isMobileExperience]);
 
   useEffect(() => {
+    if (isMobileExperience) {
+      return;
+    }
+
     window.localStorage.setItem(SOUND_STORAGE_KEY, soundEnabled ? "true" : "false");
-  }, [soundEnabled]);
+  }, [isMobileExperience, soundEnabled]);
 
   useEffect(() => {
+    if (isMobileExperience) {
+      return;
+    }
+
     const op1 = new Audio(OP1_AUDIO_PATH);
     op1.loop = true;
     op1.volume = 0.96;
@@ -151,9 +191,13 @@ export default function LoadingScreen() {
       op1AudioRef.current = null;
       op2AudioRef.current = null;
     };
-  }, []);
+  }, [isMobileExperience]);
 
   useEffect(() => {
+    if (isMobileExperience) {
+      return;
+    }
+
     const op1ShouldPlay = soundEnabled && (phase === "loading" || phase === "ready");
     const op2ShouldPlay = soundEnabled && (phase === "selecting" || phase === "transitioning");
 
@@ -192,10 +236,10 @@ export default function LoadingScreen() {
         op2AudioRef.current.currentTime = 0;
       }
     }
-  }, [audioUnlocked, phase, soundEnabled]);
+  }, [audioUnlocked, isMobileExperience, phase, soundEnabled]);
 
   useEffect(() => {
-    if (audioUnlocked) {
+    if (audioUnlocked || isMobileExperience) {
       return;
     }
 
@@ -212,7 +256,7 @@ export default function LoadingScreen() {
       window.removeEventListener("keydown", unlockAudio);
       window.removeEventListener("touchstart", unlockAudio);
     };
-  }, [audioUnlocked]);
+  }, [audioUnlocked, isMobileExperience]);
 
   useEffect(() => {
     let animationFrameId = 0;
@@ -395,6 +439,71 @@ export default function LoadingScreen() {
       : isReady
         ? "Entrance Ready"
         : "Preparing The Archive";
+
+  if (isMobileExperience) {
+    return (
+      <>
+        <div className="mobile-shield">
+          <div className="mobile-shield__inner">
+            <p className="mobile-shield__kicker">Desktop Only</p>
+            <h1 className="mobile-shield__title">From instinct to intention.</h1>
+            <p className="mobile-shield__copy">
+              This immersive 3D experience utilizes heavy real-time computing and cinematic sound design.
+            </p>
+            <p className="mobile-shield__copy">
+              To experience it in maximum fidelity, please view on a desktop or laptop.
+            </p>
+          </div>
+        </div>
+
+        <style>{`
+          .mobile-shield {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            background:
+              radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 28%),
+              linear-gradient(180deg, rgba(8, 8, 8, 0.96) 0%, rgba(0, 0, 0, 1) 100%);
+            color: rgba(255, 248, 236, 0.92);
+          }
+
+          .mobile-shield__inner {
+            width: min(28rem, 100%);
+            text-align: center;
+          }
+
+          .mobile-shield__kicker {
+            margin: 0 0 0.9rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: rgba(255, 248, 236, 0.46);
+          }
+
+          .mobile-shield__title {
+            margin: 0;
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            line-height: 1.12;
+            text-wrap: balance;
+            text-shadow: 0 0 24px rgba(255, 255, 255, 0.08);
+          }
+
+          .mobile-shield__copy {
+            margin: 1.15rem 0 0;
+            font-size: 0.92rem;
+            line-height: 1.75;
+            letter-spacing: 0.02em;
+            color: rgba(255, 248, 236, 0.72);
+          }
+        `}</style>
+      </>
+    );
+  }
 
   return (
     <div
