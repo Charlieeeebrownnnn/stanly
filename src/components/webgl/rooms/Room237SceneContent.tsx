@@ -92,7 +92,7 @@ function resolveRoom237Movement(currentX: number, currentZ: number, targetX: num
 }
 
 function Room237Model({ onReady }: { onReady?: () => void }) {
-  const { scene } = useGLTF("/models/room-237.glb");
+  const { scene } = useGLTF("/models/newroom-237.glb");
 
   const prepared = useMemo(() => {
     const cloned = scene.clone(true);
@@ -256,3 +256,5 @@ export default function Room237SceneContent({ input, onReady }: RoomSceneProps) 
     </>
   );
 }
+
+useGLTF.preload("/models/newroom-237.glb");

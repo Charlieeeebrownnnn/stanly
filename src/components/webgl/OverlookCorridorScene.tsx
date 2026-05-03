@@ -47,7 +47,7 @@ const SIDE_ROOM_IDS: SideRoomId[] = ["room237", "spaceRoom", "orangeRoom", "artG
 const VISITABLE_ROOM_IDS: CorridorRoomId[] = [...SIDE_ROOM_IDS, "studyRoom"];
 const STUDY_ARTIFACT_IDS: StudyArtifactId[] = ["axe", "book", "resume"];
 const STUDY_VIDEO_PATH = "/videos/ApeToHuman.mp4";
-const STUDY_RESUME_PDF_PATH = "/data/Yu%20Nien%20Liu.pdf";
+const STUDY_RESUME_PDF_PATH = "/data/Yu-Nien-Liu_Resume.pdf";
 const STUDY_CURTAIN_DURATION_MS = 920;
 const STUDY_ENDING_ACTION_DELAY_MS = 2400;
 const HALLWAY_AUDIO_PATH = "/assets/music/hallway.m4a?v=20260502";
@@ -67,6 +67,10 @@ const TWINS_FADE_IN_MS = 220;
 const TWINS_HOLD_MS = 2800;
 const TWINS_MAX_OPACITY = 1;
 const TWINS_DEBUG_ALWAYS_VISIBLE = false;
+const TWINS_POSITION: [number, number, number] = [-2.5, 0, TWINS_DOOR_Z];
+const TWINS_MESH_POSITION: [number, number, number] = [0, 1.58, 0.18];
+const TWINS_PLANE_SIZE: [number, number] = [2.42, 3.16];
+const TWINS_SWAY_X = 0.02;
 const CORRIDOR_AMBIENT_INTENSITY = 0.7;
 const CORRIDOR_DIRECTIONAL_INTENSITY = 0.7;
 const GRANDMAS_TV_DEBUG_ALWAYS_VISIBLE = true;
@@ -152,6 +156,10 @@ function getStudyRoomArtifactCopy(
   }
 
   return `${exploredCount} Of ${totalArtifactCount} Artifacts Explored`;
+}
+
+function hasVisitedAllSideRooms(visitedRoomIds: CorridorRoomId[]) {
+  return SIDE_ROOM_IDS.every((roomId) => visitedRoomIds.includes(roomId));
 }
 
 function getDoorEtchingColor(variant: DoorVariant) {
@@ -1098,7 +1106,7 @@ function TwinsEasterEgg({
 
     if (TWINS_DEBUG_ALWAYS_VISIBLE) {
       group.visible = true;
-      group.position.x = -3;
+      group.position.x = TWINS_POSITION[0];
       material.opacity = 1;
       light.intensity = 3.8;
       flashLight.intensity = 0;
@@ -1150,7 +1158,7 @@ function TwinsEasterEgg({
       : 0.2 + Math.max(0, Math.sin(clock.elapsedTime * 18)) * 0.28;
     const corridorDarken = initialFlashWindow ? 0.22 + Math.max(0, Math.sin(clock.elapsedTime * 26)) * 0.16 : 0;
     group.visible = true;
-    group.position.x = -1.14 + Math.sin(clock.elapsedTime * 0.45) * 0.02;
+    group.position.x = TWINS_POSITION[0] + Math.sin(clock.elapsedTime * 0.45) * TWINS_SWAY_X;
     material.opacity = opacity * shimmer;
     light.intensity = opacity * (5.2 + flashPulse);
     flashLight.intensity = opacity * (initialFlashWindow ? 12.4 : 3.4) * flashPulse;
@@ -1167,12 +1175,12 @@ function TwinsEasterEgg({
   return (
     <group
       ref={groupRef}
-      position={[0, 0, TWINS_DOOR_Z]}
+      position={TWINS_POSITION}
       rotation={[0, Math.PI, 0]}
       visible={false}
     >
-      <mesh position={[0, 1.58, 0.18]}>
-        <planeGeometry args={[2.42, 3.16]} />
+      <mesh position={TWINS_MESH_POSITION}>
+        <planeGeometry args={TWINS_PLANE_SIZE} />
         <meshBasicMaterial
           ref={materialRef}
           map={twinsTexture}
@@ -1528,6 +1536,7 @@ export default function OverlookCorridorScene({
 
     const updatePrompt = () => {
       if (!activeRoomId) {
+        const studyRoomUnlocked = hasVisitedAllSideRooms(visitedRoomIds);
         const nearRoom237 =
           motion.current.x > ROOM_PROMPT_X &&
           Math.abs(motion.current.z - ROOM_237_DOOR_Z) < DOOR_PROMPT_Z_RANGE;
@@ -1551,7 +1560,7 @@ export default function OverlookCorridorScene({
               ? "orangeRoom"
               : nearArtGallery
                 ? "artGallery"
-                : nearStudyRoom
+                : nearStudyRoom && studyRoomUnlocked
                   ? "studyRoom"
                   : null;
 
@@ -1568,7 +1577,7 @@ export default function OverlookCorridorScene({
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [activeRoomId, previewMode, promptRoomId]);
+  }, [activeRoomId, previewMode, promptRoomId, visitedRoomIds]);
 
   useEffect(() => {
     if (previewMode) {
@@ -1587,7 +1596,12 @@ export default function OverlookCorridorScene({
         return;
       }
 
-      if (event.key === "Enter" && promptRoomId && !activeRoomId) {
+      if (
+        event.key === "Enter" &&
+        promptRoomId &&
+        !activeRoomId &&
+        (promptRoomId !== "studyRoom" || hasVisitedAllSideRooms(visitedRoomIds))
+      ) {
         event.preventDefault();
         input.current.forward = false;
         input.current.backward = false;

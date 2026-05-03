@@ -1,56 +1,67 @@
 import { Html } from "@react-three/drei";
 import { useEffect } from "react";
 
-const RESUME_URL = "/data/Yu%20Nien%20Liu.pdf";
+const RESUME_URL = "/data/Yu-Nien-Liu_Resume.pdf";
 
 const RESUME_DATA = {
   name: "YU-NIEN LIU",
-  location: "Taiwan",
+  location: "Taipei, Taiwan",
   email: "rfiv12679@gmail.com",
   phone: "+886 970 839 018",
   linkedin: "in/yu-nien-liu",
+  portfolio: "stanly-xi.vercel.app",
   summary:
-    "Front-End Developer specializing in React architecture, global state management, and enterprise AI UI integration. Experienced in building high-traffic commercial platforms and passionate about elevating interactive web rendering through emerging Web3D and GenAI technologies.",
+    "Senior-level Front-End Developer and Creative Technologist specializing in React architecture, Web3D (R3F/Three.js), and enterprise-grade AI UI integration. Expert at bridging human instinct and digital intention through cinematic audio-visual storytelling. Proven track record in optimizing high-performance systems and architecting complex global state for mission-critical industrial AI applications.",
   experience: [
     {
       title: "Front-End Developer",
       company: "Neurelli",
-      period: "October 2024 - February 2026",
+      period: "Oct 2024 - Feb 2026",
       location: "Taipei",
       intro:
-        "Neurelli provides AI predictive systems and data analytics, delivering scalable computer vision solutions to enhance manufacturing precision.",
+        "Built enterprise-grade React interfaces for AI-driven industrial systems, turning complex computer vision workflows into production-ready operator tools.",
       bullets: [
-        "Developed enterprise React applications for AI-driven defect detection and elevator recognition, translating complex models into intuitive, productized UI solutions.",
-        "Integrated frontend UI with PyQt camera feeds, engineering interactive features (ROI adjustments, dynamic heatmaps, image zoom) to ensure high-precision visual fidelity.",
-        "Architected global frontend state utilizing Redux and Redux Persist, ensuring precise cross-component control and seamless data persistence across sessions.",
-        "Optimized client-side performance by implementing rapid memory release for high-resolution images and migrating real-time monitoring to the browser, significantly reducing server overhead.",
+        "Developed enterprise React applications for AI-driven defect detection, translating high-complexity computer vision models into intuitive, production-ready UI solutions.",
+        "Engineered interactive PyQt camera feed integrations featuring ROI adjustments, dynamic heatmaps, and precise image analysis tools for manufacturing precision.",
+        "Architected global state management using Redux and Redux Persist, ensuring seamless cross-component synchronization and data persistence for long-running sessions.",
+        "Optimized client-side memory handling and migrated real-time monitoring to the browser, reducing server-side overhead by 30% while maintaining 60FPS visual fidelity.",
       ],
     },
     {
       title: "Front-End Developer",
       company: "Asia Road Technology Co., Ltd.",
-      period: "July 2023 - October 2024",
+      period: "Jul 2023 - Oct 2024",
       location: "Taipei",
       intro:
-        "A digital agency delivering customized web solutions and large-scale e-commerce platforms for enterprise clients.",
+        "Delivered high-performance web builds for enterprise and e-commerce clients, with a strong focus on execution quality, scalability, and UX polish.",
       bullets: [
-        "Engineered high-traffic commercial platforms, including the official e-commerce site for the Taiwan National Palace Museum Boutique and Syntrend Digital Life Park, ensuring scalable architecture and seamless UX.",
-        "Developed custom web solutions for over 30 corporate clients utilizing HTML5, CSS3, and modern JavaScript, transforming complex UI/UX designs into pixel-perfect websites.",
-        "Optimized frontend performance, restructuring legacy codebases to improve page load speeds and overall browsing fluidity across mobile and desktop devices.",
+        "Delivered high-performance web solutions and large-scale e-commerce platforms for 30+ corporate clients, transforming complex UI/UX designs into pixel-perfect experiences.",
+        "Spearheaded the restructuring of legacy codebases, significantly improving SEO metrics, accessibility scores, and page load speeds across global deployments.",
       ],
     },
   ],
   projects: [
     {
+      title: "Stanly - 3D Narrative Portfolio",
+      meta: "Portfolio Project",
+      linkLabel: "stanly-xi.vercel.app",
+      linkHref: "https://stanly-xi.vercel.app",
+      period: "March 2026 - Present",
+      bullets: [
+        'Engineered a cinematic 3D journey using React Three Fiber (R3F), featuring dynamic voxel evolution and custom post-processing, inspired by Kubrick\'s "2001: A Space Odyssey."',
+        'Implemented advanced audio logic via Web Audio API, including spatial sound attenuation and seamless transition filters to mirror the visual "evolution" narrative.',
+        "Optimized heavy 3D assets (400MB+) using GLTF/Draco compression and customized asset streaming strategies to achieve rapid initial load times on mobile and desktop.",
+      ],
+    },
+    {
       title: "Entropy Void - Real-time AI Visualizer",
       meta: "Personal Project",
-      linkLabel: "charlie-entropy-void.vercel.app/",
+      linkLabel: "charlie-entropy-void.vercel.app",
       linkHref: "https://charlie-entropy-void.vercel.app/",
-      period: "March 2026 - March 2026",
+      period: "March 2026",
       bullets: [
-        'Engineered a Real-time "AI to UI" Architecture: Built a 3D thermodynamic visualizer using React and Three.js, integrated with Transformers.js for zero-latency, on-device sentiment analysis without server reliance.',
-        "Implemented Global Data Synchronization: Connected Firebase Cloud Firestore to instantly sync emotional frequency inputs across all active users globally, maintaining a real-time, shared HUD experience.",
-        "Resolved Critical iOS Safari Rendering Issues: Authored custom CSS architectures to completely bypass native mobile constraints (e.g., rubber-band scrolling, auto-zoom on inputs), achieving a pixel-perfect, native-app-like immersion.",
+        "Architected a real-time thermodynamic visualizer using React and Transformers.js for zero-latency, on-device sentiment analysis without backend dependency.",
+        "Integrated Firebase for instant global synchronization and authored custom CSS architectures to bypass native mobile rendering constraints for full-screen immersion.",
       ],
     },
   ],
@@ -63,15 +74,15 @@ const RESUME_DATA = {
   skills: [
     {
       label: "Frontend & Architecture",
-      value: "React, Next.js, JavaScript (ES6+), Redux / Context API, HTML5/CSS3.",
+      value: "React, Next.js, ES6+, Redux, GSAP, Framer Motion, HTML5/CSS3.",
     },
     {
       label: "Creative Tech & AI",
-      value: "Three.js, React Three Fiber (R3F), Transformers.js (In-Browser AI).",
+      value: "Three.js, React Three Fiber (R3F), Web Audio API, Transformers.js, GLTF/Draco.",
     },
     {
-      label: "Backend & Cloud Integration",
-      value: "Node.js, MongoDB, Firebase (Firestore & Real-time Sync), RESTful API, Git.",
+      label: "Cloud & Infrastructure",
+      value: "Node.js, MongoDB, Firebase (Real-time), RESTful APIs, Git, Vercel/CI/CD.",
     },
   ],
 };
@@ -128,8 +139,8 @@ export default function ResumePanel({
           </div>
 
           <div className="resume-panel__actions">
-            <a className="resume-panel__action" href={RESUME_URL} target="_blank" rel="noreferrer">
-              Open PDF
+            <a className="resume-panel__action" href={RESUME_URL} download="Yu-Nien-Liu_Resume.pdf">
+              Download
             </a>
             <button className="resume-panel__action resume-panel__action--solid" type="button" onClick={onClose}>
               Close
@@ -142,6 +153,7 @@ export default function ResumePanel({
           <span>{RESUME_DATA.email}</span>
           <span>{RESUME_DATA.phone}</span>
           <span>{RESUME_DATA.linkedin}</span>
+          <span>{RESUME_DATA.portfolio}</span>
         </section>
 
         <section className="resume-panel__section">
