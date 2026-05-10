@@ -432,6 +432,7 @@ export default function LoadingScreen() {
     phase === "selecting" || phase === "transitioning" || phase === "corridor";
   const isBloodFlooding = phase === "transitioning";
   const isBloodFloodComplete = phase === "corridor";
+  const shouldShowSoundPrompt = soundEnabled && phase !== "corridor";
   const statusLabel = isBloodFlooding
     ? "Threshold Crossing"
     : phase === "selecting"
@@ -622,9 +623,33 @@ export default function LoadingScreen() {
             {statusLabel}
           </div>
 
-          <div className="text-center text-[0.56rem] tracking-[0.18em] text-emerald-50/60">
-            Please turn on sound for the full experience.
-          </div>
+          {shouldShowSoundPrompt ? (
+            !audioUnlocked ? (
+              <div className="pointer-events-auto flex flex-col items-center gap-3 rounded-[1.4rem] border border-amber-100/14 bg-black/28 px-5 py-4 text-center text-amber-50/82 shadow-[0_0_32px_rgba(255,214,132,0.08)] backdrop-blur-xl">
+                <div className="text-[0.58rem] uppercase tracking-[0.34em] text-amber-100/62">
+                  Cinematic Audio Recommended
+                </div>
+                <p className="max-w-[24rem] text-[0.72rem] leading-6 tracking-[0.12em] text-amber-50/78">
+                  Enable sound before entering. The score and spatial audio are part of the narrative.
+                </p>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setAudioUnlocked(true);
+                    setSoundEnabled(true);
+                  }}
+                  className="rounded-full border border-amber-100/18 bg-amber-100/10 px-4 py-2 text-[0.62rem] uppercase tracking-[0.24em] text-amber-50 transition hover:bg-amber-100/16 hover:text-white"
+                >
+                  Enable Sound
+                </button>
+              </div>
+            ) : (
+              <div className="text-center text-[0.56rem] tracking-[0.18em] text-emerald-50/60">
+                Please turn on sound for the full experience.
+              </div>
+            )
+          ) : null}
 
           {phase === "loading" || phase === "ready" ? (
             <div className="loading-screen-percent-wrap">
@@ -704,7 +729,7 @@ export default function LoadingScreen() {
             className="text-[0.68rem] uppercase tracking-[0.22em]"
             style={{ animation: "soundPromptPulse 1.5s ease-in-out infinite" }}
           >
-            Click to enable sound
+            Speaker control
           </div>
           <svg
             width="56"

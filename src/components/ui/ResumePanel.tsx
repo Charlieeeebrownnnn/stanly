@@ -1,5 +1,6 @@
 import { Html } from "@react-three/drei";
 import { useEffect } from "react";
+import useIsSafari from "../useIsSafari";
 
 const RESUME_URL = "/data/Yu-Nien-Liu_Resume.pdf";
 
@@ -96,6 +97,8 @@ export default function ResumePanel({
   onClose: () => void;
   position?: [number, number, number];
 }) {
+  const isSafari = useIsSafari();
+
   useEffect(() => {
     if (!isOpen) {
       return undefined;
@@ -120,18 +123,25 @@ export default function ResumePanel({
 
   return (
     <Html
-      transform
+      transform={!isSafari}
+      fullscreen={isSafari}
       position={position}
       distanceFactor={1.28}
       occlude={false}
       zIndexRange={[40, 0]}
       wrapperClass="resume-panel__html-root"
     >
-      <article
-        className="resume-panel"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className={isSafari ? "resume-panel__viewport is-safari" : "resume-panel__viewport"}>
+        <article
+          className={isSafari ? "resume-panel resume-panel--safari" : "resume-panel"}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          onWheel={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+          onTouchMove={(event) => event.stopPropagation()}
+        >
         <header className="resume-panel__hero">
           <div>
             <p className="resume-panel__eyebrow">Paper Tablet Resume</p>
@@ -233,11 +243,28 @@ export default function ResumePanel({
             </div>
           </div>
         </section>
-      </article>
+        </article>
+      </div>
 
       <style>{`
         .resume-panel__html-root {
           pointer-events: auto;
+          touch-action: manipulation;
+        }
+
+        .resume-panel__viewport {
+          display: contents;
+        }
+
+        .resume-panel__viewport.is-safari {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100vw;
+          height: 100vh;
+          padding: 1.25rem;
+          box-sizing: border-box;
+          pointer-events: none;
         }
 
         .resume-panel {
@@ -255,6 +282,26 @@ export default function ResumePanel({
             inset 0 1px 0 rgba(255, 255, 255, 0.5);
           backdrop-filter: blur(16px);
           font-family: Georgia, "Times New Roman", serif;
+        }
+
+        .resume-panel--safari {
+          width: min(80rem, 98vw);
+          max-height: min(92vh, 68rem);
+          overflow-x: hidden;
+          overflow-y: auto;
+          touch-action: pan-y;
+          transform: translate3d(0, -8vh, 0);
+          -webkit-transform: translate3d(0, -8vh, 0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          will-change: transform;
+          isolation: isolate;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
+          pointer-events: auto;
+          contain: layout paint style;
         }
 
         .resume-panel__hero,
@@ -313,6 +360,13 @@ export default function ResumePanel({
         .resume-panel__action--solid {
           background: #3b2a1d;
           color: #fff7ec;
+        }
+
+        .resume-panel--safari .resume-panel__action {
+          position: relative;
+          z-index: 1;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .resume-panel__contact {

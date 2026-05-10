@@ -2,6 +2,7 @@ import { useCursor, useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import useIsSafari from "../../useIsSafari";
 import ProjectLorePanel from "../../ui/ProjectLorePanel";
 
 const COVER_POSITION = new THREE.Vector3(-1.6, 2.9, -0.9);
@@ -73,9 +74,11 @@ export default function StudyRoomAxeArtifact() {
   const [hovered, setHovered] = useState(false);
   const [isNear, setIsNear] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const isSafari = useIsSafari();
   const { camera } = useThree();
   const axeRef = useRef<THREE.Group | null>(null);
   const panelAnchorRef = useRef<THREE.Group | null>(null);
+  const panelSettledRef = useRef(false);
   const accentLightRef = useRef<THREE.PointLight | null>(null);
   const nearRef = useRef(false);
   const openedRef = useRef(false);
@@ -139,6 +142,10 @@ export default function StudyRoomAxeArtifact() {
     };
   }, [isNear, isOpen]);
 
+  useEffect(() => {
+    panelSettledRef.current = false;
+  }, [isOpen, isSafari]);
+
   useFrame(({ clock }) => {
     const elapsed = clock.getElapsedTime();
     const active = hovered || isNear;
@@ -171,11 +178,20 @@ export default function StudyRoomAxeArtifact() {
         .copy(camera.position)
         .add(forward.multiplyScalar(2.18))
         .add(right.multiplyScalar(0.08))
-        .add(up.multiplyScalar(0.06));
+        .add(up.multiplyScalar(isSafari ? -0.14 : 0.06));
 
-      panelAnchorRef.current.position.lerp(targetPosition, 0.18);
       targetQuaternion.copy(camera.quaternion);
-      panelAnchorRef.current.quaternion.slerp(targetQuaternion, 0.22);
+
+      if (isSafari) {
+        if (!panelSettledRef.current) {
+          panelAnchorRef.current.position.copy(targetPosition);
+          panelAnchorRef.current.quaternion.copy(targetQuaternion);
+          panelSettledRef.current = true;
+        }
+      } else {
+        panelAnchorRef.current.position.lerp(targetPosition, 0.18);
+        panelAnchorRef.current.quaternion.slerp(targetQuaternion, 0.22);
+      }
     }
   });
 

@@ -1,5 +1,6 @@
 import { Html } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
+import useIsSafari from "../useIsSafari";
 
 const PANEL_VARIANTS = {
   manufacturing: {
@@ -19,12 +20,12 @@ const PANEL_VARIANTS = {
       {
         id: 3,
         title: "From AI Demo To Operational Workflow",
-        body: "The biggest win was not just model quality, but workflow consolidation. By bringing annotation, training, and device management into one frontend experience, the system became something line teams could actually operate, reducing deployment friction and accelerating iteration by 40%+.",
+        body: "My contribution was turning a technically fragmented system into an operator-facing workflow. By consolidating annotation, training progress, and device management into one frontend experience, the platform became easier for real teams to understand and act on, reducing deployment friction and accelerating iteration by 40%+.",
       },
       {
         id: 4,
-        title: "Workflow In Motion: Defect Detection In Production",
-        body: "This live demo captures the product in action: defect detection flowing through a production-facing interface with enough clarity for operators, engineers, and deployment teams to align around the same system state.",
+        title: "What The Frontend Ultimately Enabled",
+        body: "The strongest outcome was operational clarity. Instead of exposing internal model complexity, the interface gave different roles a shared view of progress, device state, and deployment readiness, helping the system function as a usable product rather than a disconnected AI demo.",
       },
     ],
   },
@@ -183,6 +184,32 @@ function ImpactMetrics() {
           <span>Less field friction</span>
           <span>Faster model updates</span>
           <span>Shared operational view</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OperationalClarityBoard() {
+  return (
+    <div className="ai-panel__viz ai-panel__viz--clarity">
+      <div className="ai-panel__clarity-board">
+        <div className="ai-panel__clarity-role">
+          <label>Operators</label>
+          <strong>Readable System State</strong>
+          <span>See whether production is healthy without digging through tooling.</span>
+        </div>
+
+        <div className="ai-panel__clarity-role ai-panel__clarity-role--accent">
+          <label>Engineers</label>
+          <strong>Faster Iteration Loop</strong>
+          <span>Track training and deployment progress in one place instead of across disconnected screens.</span>
+        </div>
+
+        <div className="ai-panel__clarity-role">
+          <label>Teams</label>
+          <strong>Shared Operational View</strong>
+          <span>Align around deployment readiness with a frontend built for action, not only inspection.</span>
         </div>
       </div>
     </div>
@@ -588,7 +615,7 @@ function renderStage(projectKey, step, onExpandVideo, isExpandedVideoOpen) {
     return <ImpactMetrics />;
   }
 
-  return <ImpactVideo onExpand={onExpandVideo} isExpanded={isExpandedVideoOpen} />;
+  return <OperationalClarityBoard />;
 }
 
 export default function AiProjectPanel({
@@ -599,9 +626,10 @@ export default function AiProjectPanel({
 }) {
   const [step, setStep] = useState(0);
   const [isExpandedVideoOpen, setIsExpandedVideoOpen] = useState(false);
+  const isSafari = useIsSafari();
   const variant = useMemo(() => PANEL_VARIANTS[projectKey] ?? PANEL_VARIANTS.manufacturing, [projectKey]);
   const current = useMemo(() => variant.steps[step], [step, variant]);
-  const isVideoStep = step === variant.steps.length - 1;
+  const isVideoStep = (projectKey === "museum" || projectKey === "entropy") && step === variant.steps.length - 1;
   const canGoPrev = step > 0;
   const canGoNext = step < variant.steps.length - 1;
 
@@ -652,18 +680,25 @@ export default function AiProjectPanel({
 
   return (
     <Html
-      transform
+      transform={!isSafari}
+      fullscreen={isSafari}
       position={position}
       distanceFactor={1.22}
       occlude={false}
       zIndexRange={[30, 0]}
       wrapperClass="ai-panel__html-root"
     >
-      <div
-        className={`ai-panel ai-panel--${projectKey} ${isExpandedVideoOpen ? "is-video-expanded" : ""}`}
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className={isSafari ? "ai-panel__viewport is-safari" : "ai-panel__viewport"}>
+        <div
+          className={`ai-panel ai-panel--${projectKey} ${isExpandedVideoOpen ? "is-video-expanded" : ""} ${isSafari ? "is-safari" : ""}`}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          onWheel={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+          onTouchMove={(event) => event.stopPropagation()}
+        >
         <div className="ai-panel__header">
           <div>
             <p className="ai-panel__eyebrow">{variant.eyebrow}</p>
@@ -723,11 +758,28 @@ export default function AiProjectPanel({
             )}
           </div>
         </div>
+        </div>
       </div>
 
       <style>{`
         .ai-panel__html-root {
           pointer-events: auto;
+          touch-action: manipulation;
+        }
+
+        .ai-panel__viewport {
+          display: contents;
+        }
+
+        .ai-panel__viewport.is-safari {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100vw;
+          height: 100vh;
+          padding: 1.25rem;
+          box-sizing: border-box;
+          pointer-events: none;
         }
 
         .ai-panel {
@@ -754,6 +806,28 @@ export default function AiProjectPanel({
             max-height 260ms ease,
             transform 260ms ease,
             box-shadow 260ms ease;
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .ai-panel.is-safari {
+          overflow-x: hidden;
+          overflow-y: auto;
+          width: min(100rem, 100%);
+          max-height: min(100vh, 80rem);
+          touch-action: pan-y;
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          will-change: transform;
+          isolation: isolate;
+          animation: none;
+          transition: none;
+          backdrop-filter: blur(14px) saturate(130%);
+          -webkit-backdrop-filter: blur(14px) saturate(130%);
+          pointer-events: auto;
+          contain: layout paint style;
         }
 
         .ai-panel--museum {
@@ -769,6 +843,11 @@ export default function AiProjectPanel({
         .ai-panel.is-video-expanded {
           width: 90vw;
           max-height: min(88vh, 60rem);
+        }
+
+        .ai-panel.is-safari.is-video-expanded {
+          width: min(96vw, 94rem);
+          max-height: 94vh;
         }
 
         .ai-panel__header,
@@ -834,6 +913,15 @@ export default function AiProjectPanel({
           border-radius: 999px;
           font-size: 0.82rem;
           white-space: nowrap;
+        }
+
+        .ai-panel.is-safari .ai-panel__close,
+        .ai-panel.is-safari .ai-panel__step,
+        .ai-panel.is-safari .ai-panel__nav {
+          position: relative;
+          z-index: 1;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .ai-panel__close:hover,
@@ -1305,6 +1393,55 @@ export default function AiProjectPanel({
           font-size: 0.66rem;
           letter-spacing: 0.08em;
           text-transform: uppercase;
+        }
+
+        .ai-panel__viz--clarity {
+          align-items: stretch;
+        }
+
+        .ai-panel__clarity-board {
+          width: 100%;
+          display: grid;
+          gap: 0.75rem;
+        }
+
+        .ai-panel__clarity-role {
+          padding: 0.95rem 1rem;
+          border-radius: 18px;
+          border: 1px solid rgba(123, 201, 255, 0.18);
+          background: linear-gradient(180deg, rgba(16, 28, 44, 0.9), rgba(9, 17, 30, 0.88));
+          box-shadow:
+            inset 0 0 24px rgba(102, 186, 255, 0.06),
+            0 0 18px rgba(73, 153, 255, 0.08);
+          display: grid;
+          gap: 0.34rem;
+        }
+
+        .ai-panel__clarity-role--accent {
+          border-color: rgba(118, 201, 255, 0.34);
+          background: linear-gradient(180deg, rgba(28, 53, 86, 0.92), rgba(11, 23, 40, 0.92));
+          box-shadow:
+            inset 0 0 24px rgba(118, 201, 255, 0.08),
+            0 0 22px rgba(92, 177, 255, 0.12);
+        }
+
+        .ai-panel__clarity-role label {
+          color: rgba(188, 218, 255, 0.72);
+          font-size: 0.64rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        .ai-panel__clarity-role strong {
+          color: #f7fbff;
+          font-size: 0.92rem;
+          line-height: 1.24;
+        }
+
+        .ai-panel__clarity-role span {
+          color: rgba(214, 231, 250, 0.84);
+          font-size: 0.74rem;
+          line-height: 1.48;
         }
 
         .ai-panel__viz--museum-atlas,

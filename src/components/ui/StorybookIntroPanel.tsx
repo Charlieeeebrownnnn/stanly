@@ -1,5 +1,6 @@
 import { Html } from "@react-three/drei";
 import { useEffect, useState } from "react";
+import useIsSafari from "../useIsSafari";
 
 type StorySpread = {
   leftTitle: string;
@@ -62,6 +63,7 @@ export default function StorybookIntroPanel({
   position?: [number, number, number];
 }) {
   const [pageIndex, setPageIndex] = useState(0);
+  const isSafari = useIsSafari();
 
   useEffect(() => {
     if (!isOpen) {
@@ -97,18 +99,25 @@ export default function StorybookIntroPanel({
 
   return (
     <Html
-      transform
+      transform={!isSafari}
+      fullscreen={isSafari}
       position={position}
       distanceFactor={1.18}
       occlude={false}
       zIndexRange={[40, 0]}
       wrapperClass="storybook-panel__html-root"
     >
-      <article
-        className="storybook-panel"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className={isSafari ? "storybook-panel__viewport is-safari" : "storybook-panel__viewport"}>
+        <article
+          className={isSafari ? "storybook-panel storybook-panel--safari" : "storybook-panel"}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          onWheel={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+          onTouchMove={(event) => event.stopPropagation()}
+        >
         <header className="storybook-panel__header">
           <div>
             <p className="storybook-panel__eyebrow">Interactive Introduction</p>
@@ -173,11 +182,28 @@ export default function StorybookIntroPanel({
             </button>
           </div>
         </footer>
-      </article>
+        </article>
+      </div>
 
       <style>{`
         .storybook-panel__html-root {
           pointer-events: auto;
+          touch-action: manipulation;
+        }
+
+        .storybook-panel__viewport {
+          display: contents;
+        }
+
+        .storybook-panel__viewport.is-safari {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100vw;
+          height: 100vh;
+          padding: 1.25rem;
+          box-sizing: border-box;
+          pointer-events: none;
         }
 
         .storybook-panel {
@@ -194,6 +220,26 @@ export default function StorybookIntroPanel({
           color: #2c2219;
           backdrop-filter: blur(16px);
           font-family: Georgia, "Times New Roman", serif;
+        }
+
+        .storybook-panel--safari {
+          width: min(84rem, 98vw);
+          max-height: min(62rem, 90vh);
+          overflow-x: hidden;
+          overflow-y: auto;
+          touch-action: pan-y;
+          transform: translate3d(0, -8vh, 0);
+          -webkit-transform: translate3d(0, -8vh, 0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          will-change: transform;
+          isolation: isolate;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
+          pointer-events: auto;
+          contain: layout paint style;
         }
 
         .storybook-panel__header,
@@ -246,6 +292,14 @@ export default function StorybookIntroPanel({
         .storybook-panel__nav-button:disabled {
           opacity: 0.42;
           cursor: default;
+        }
+
+        .storybook-panel--safari .storybook-panel__close,
+        .storybook-panel--safari .storybook-panel__nav-button {
+          position: relative;
+          z-index: 1;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .storybook-panel__book {

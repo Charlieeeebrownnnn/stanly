@@ -2,6 +2,7 @@ import { useCursor, useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import useIsSafari from "../../useIsSafari";
 import AiProjectPanel from "../../ui/AiProjectPanel.jsx";
 
 const HOTSPOT_POSITION = new THREE.Vector3(0.02, 0.98, 2.72);
@@ -52,6 +53,7 @@ export default function Room237TypewriterArtifact() {
   const [hovered, setHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isNear, setIsNear] = useState(false);
+  const isSafari = useIsSafari();
   const { camera } = useThree();
   const artifactRef = useRef(null);
   const auraRef = useRef(null);
@@ -59,6 +61,7 @@ export default function Room237TypewriterArtifact() {
   const shimmerRef = useRef(null);
   const glowRef = useRef(null);
   const panelAnchorRef = useRef(null);
+  const panelSettledRef = useRef(false);
   const interactLightRef = useRef(null);
   const nearRef = useRef(false);
   const sparkRefs = useRef([]);
@@ -109,6 +112,10 @@ export default function Room237TypewriterArtifact() {
       );
     };
   }, [isNear, isOpen]);
+
+  useEffect(() => {
+    panelSettledRef.current = false;
+  }, [isOpen, isSafari]);
 
   useFrame(({ clock }) => {
     const elapsed = clock.getElapsedTime();
@@ -184,9 +191,18 @@ export default function Room237TypewriterArtifact() {
         .add(right.multiplyScalar(0.34))
         .add(up.multiplyScalar(0.08));
 
-      panelAnchorRef.current.position.lerp(targetPosition, 0.18);
       targetQuaternion.copy(camera.quaternion);
-      panelAnchorRef.current.quaternion.slerp(targetQuaternion, 0.22);
+
+      if (isSafari) {
+        if (!panelSettledRef.current) {
+          panelAnchorRef.current.position.copy(targetPosition);
+          panelAnchorRef.current.quaternion.copy(targetQuaternion);
+          panelSettledRef.current = true;
+        }
+      } else {
+        panelAnchorRef.current.position.lerp(targetPosition, 0.18);
+        panelAnchorRef.current.quaternion.slerp(targetQuaternion, 0.22);
+      }
     }
   });
 

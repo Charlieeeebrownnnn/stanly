@@ -1,5 +1,6 @@
 import { Html } from "@react-three/drei";
 import { useEffect, useState } from "react";
+import useIsSafari from "../useIsSafari";
 
 type LoreSpread = {
   leftTitle: string;
@@ -64,6 +65,7 @@ export default function ProjectLorePanel({
   position?: [number, number, number];
 }) {
   const [pageIndex, setPageIndex] = useState(0);
+  const isSafari = useIsSafari();
 
   useEffect(() => {
     if (!isOpen) {
@@ -99,18 +101,25 @@ export default function ProjectLorePanel({
 
   return (
     <Html
-      transform
+      transform={!isSafari}
+      fullscreen={isSafari}
       position={position}
       distanceFactor={1.16}
       occlude={false}
       zIndexRange={[40, 0]}
       wrapperClass="lore-panel__html-root"
     >
-      <article
-        className="lore-panel"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className={isSafari ? "lore-panel__viewport is-safari" : "lore-panel__viewport"}>
+        <article
+          className={isSafari ? "lore-panel lore-panel--safari" : "lore-panel"}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          onWheel={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+          onTouchMove={(event) => event.stopPropagation()}
+        >
         <header className="lore-panel__header">
           <div>
             <p className="lore-panel__eyebrow">Project Setting Book</p>
@@ -175,11 +184,28 @@ export default function ProjectLorePanel({
             </button>
           </div>
         </footer>
-      </article>
+        </article>
+      </div>
 
       <style>{`
         .lore-panel__html-root {
           pointer-events: auto;
+          touch-action: manipulation;
+        }
+
+        .lore-panel__viewport {
+          display: contents;
+        }
+
+        .lore-panel__viewport.is-safari {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100vw;
+          height: 100vh;
+          padding: 1.25rem;
+          box-sizing: border-box;
+          pointer-events: none;
         }
 
         .lore-panel {
@@ -196,6 +222,26 @@ export default function ProjectLorePanel({
           color: #2b2017;
           backdrop-filter: blur(16px);
           font-family: Georgia, "Times New Roman", serif;
+        }
+
+        .lore-panel--safari {
+          width: min(84rem, 98vw);
+          max-height: min(62rem, 90vh);
+          overflow-x: hidden;
+          overflow-y: auto;
+          touch-action: pan-y;
+          transform: translate3d(0, -8vh, 0);
+          -webkit-transform: translate3d(0, -8vh, 0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          will-change: transform;
+          isolation: isolate;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
+          pointer-events: auto;
+          contain: layout paint style;
         }
 
         .lore-panel__header,
@@ -248,6 +294,14 @@ export default function ProjectLorePanel({
         .lore-panel__nav-button:disabled {
           opacity: 0.42;
           cursor: default;
+        }
+
+        .lore-panel--safari .lore-panel__close,
+        .lore-panel--safari .lore-panel__nav-button {
+          position: relative;
+          z-index: 1;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .lore-panel__book {
