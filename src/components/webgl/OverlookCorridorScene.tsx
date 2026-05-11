@@ -56,7 +56,7 @@ const SIDE_ROOM_IDS: SideRoomId[] = ["room237", "spaceRoom", "orangeRoom", "artG
 const VISITABLE_ROOM_IDS: CorridorRoomId[] = [...SIDE_ROOM_IDS, "studyRoom"];
 const STUDY_ARTIFACT_IDS: StudyArtifactId[] = ["axe", "book", "resume"];
 const STUDY_VIDEO_PATH = "/videos/ApeToHuman.mp4";
-const STUDY_RESUME_PDF_PATH = "/data/Yu-Nien-Liu_Resume.pdf";
+const STUDY_RESUME_PDF_PATH = "/data/Yu-Nien-Liu-ResumeNew.pdf";
 const STUDY_CURTAIN_DURATION_MS = 920;
 const STUDY_ENDING_ACTION_DELAY_MS = 2400;
 const HALLWAY_AUDIO_PATH = "/assets/music/hallway.m4a?v=20260502";
@@ -2199,7 +2199,7 @@ export default function OverlookCorridorScene({
   const handleStudyDownloadPdf = () => {
     const anchor = document.createElement("a");
     anchor.href = STUDY_RESUME_PDF_PATH;
-    anchor.download = "Yu-Nien-Liu-Resume.pdf";
+    anchor.download = "Yu-Nien-Liu-ResumeNew.pdf";
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);

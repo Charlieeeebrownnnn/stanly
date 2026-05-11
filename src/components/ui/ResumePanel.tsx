@@ -2,7 +2,7 @@ import { Html } from "@react-three/drei";
 import { useEffect } from "react";
 import useIsSafari from "../useIsSafari";
 
-const RESUME_URL = "/data/Yu-Nien-Liu_Resume.pdf";
+const RESUME_URL = "/data/Yu-Nien-Liu-ResumeNew.pdf";
 
 const RESUME_DATA = {
   name: "YU-NIEN LIU",
@@ -149,7 +149,7 @@ export default function ResumePanel({
           </div>
 
           <div className="resume-panel__actions">
-            <a className="resume-panel__action" href={RESUME_URL} download="Yu-Nien-Liu_Resume.pdf">
+            <a className="resume-panel__action" href={RESUME_URL} download="Yu-Nien-Liu-ResumeNew.pdf">
               Download
             </a>
             <button className="resume-panel__action resume-panel__action--solid" type="button" onClick={onClose}>
